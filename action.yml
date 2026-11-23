@@ -51,7 +51,9 @@ runs:
         echo "work=$work" >> "$GITHUB_OUTPUT"
         echo "media=$work/media" >> "$GITHUB_OUTPUT"
         echo "data=$work/data" >> "$GITHUB_OUTPUT"
-        echo "media-key=stash-test-media-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/scripts/generate_media.py', github.action_path)) }}" >> "$GITHUB_OUTPUT"
+        # hashFiles() only reads inside GITHUB_WORKSPACE, and action_path is outside it.
+        hash="$(python3 -c 'import hashlib,sys; print(hashlib.sha256(open(sys.argv[1],"rb").read()).hexdigest()[:16])' "${{ github.action_path }}/scripts/generate_media.py")"
+        echo "media-key=stash-test-media-${{ runner.os }}-${{ runner.arch }}-$hash" >> "$GITHUB_OUTPUT"
 
     - name: Install ffmpeg
       shell: bash
