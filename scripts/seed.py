@@ -40,8 +40,9 @@ def compact(d: dict[str, Any]) -> dict[str, Any]:
 
 
 class Seeder:
-    def __init__(self, stash: Stash, profile: dict[str, Any], assets: Path) -> None:
+    def __init__(self, stash: Stash, profile: dict[str, Any], assets: Path, python: str) -> None:
         self.s = stash
+        self.python = python
         self.p = profile
         self.assets = assets
         self.tags: dict[str, str] = {}
@@ -102,6 +103,8 @@ class Seeder:
             general["ffprobePath"] = ffprobe
         if scrapers_dir:
             general["scrapersPath"] = scrapers_dir
+            # Stash substitutes this for the scraper's `python3` command (needed on Windows).
+            general["pythonPath"] = self.python
         self.s.gql("mutation($i: ConfigGeneralInput!) { configureGeneral(input: $i) { parallelTasks } }", {"i": general})
         if scrapers_dir:
             self.s.gql("mutation { reloadScrapers }")
@@ -440,12 +443,13 @@ def main() -> None:
         default=str(ROOT / "fixtures" / "scrapers"),
         help="fixtures/scrapers directory, as seen by the server ('' to skip scrapers)",
     )
+    ap.add_argument("--python", default=sys.executable, help="python for script scrapers, as seen by the server")
     ap.add_argument("--env-out", type=Path, default=ROOT / "stash-test-server.env")
     args = ap.parse_args()
 
     profile = json.loads(args.profile.read_text(encoding="utf-8"))
     stash = Stash(args.url)
-    seeder = Seeder(stash, profile, args.assets)
+    seeder = Seeder(stash, profile, args.assets, args.python)
     try:
         status = stash.wait_until_up()
         if status["status"] == "AUTH_REQUIRED":

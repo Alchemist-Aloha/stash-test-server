@@ -10,6 +10,8 @@ case "$(uname -s)-$(uname -m)" in
   Linux-x86_64)          asset=stash-linux ;;
   Linux-aarch64|Linux-arm64) asset=stash-linux-arm64v8 ;;
   Darwin-*)              asset=stash-macos ;;
+  # Windows on ARM runs the x64 build under emulation.
+  MINGW*|MSYS*|CYGWIN*)  asset=stash-win.exe ;;
   *) echo "unsupported platform $(uname -s)-$(uname -m)" >&2; exit 1 ;;
 esac
 
@@ -21,6 +23,8 @@ fi
 
 mkdir -p "$root/bin"
 echo "downloading $url"
-curl -fsSL --retry 3 -o "$root/bin/stash" "$url"
-chmod +x "$root/bin/stash"
+exe="$root/bin/stash"
+[[ "$asset" == *.exe ]] && exe="$exe.exe"  # MSYS still runs it as bin/stash
+curl -fsSL --retry 3 -o "$exe" "$url"
+chmod +x "$exe"
 echo "installed $("$root/bin/stash" --version 2>/dev/null | head -1 || echo "$asset ($version)")"

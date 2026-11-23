@@ -3,7 +3,7 @@
 #   python3 scripts/generate_media.py --out media
 #   docker compose -f docker/compose.yml up -d
 #   python3 scripts/seed.py --server-data-dir /data --server-library-dir /library \
-#       --server-scrapers-dir /fixtures/scrapers \
+#       --server-scrapers-dir /fixtures/scrapers --python python3 \
 #       --ffmpeg /usr/bin/ffmpeg --ffprobe /usr/bin/ffprobe
 #   python3 scripts/verify.py
 #
