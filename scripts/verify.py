@@ -163,7 +163,10 @@ def main() -> None:
         served("scene sprite", p["sprite"])
         served("scene vtt", p["vtt"])
         served("scene stream", p["stream"], lambda st: st in (200, 206), rng="bytes=0-1023")
-        served("scene caption", f"{p['caption']}?lang=en&type=vtt" if p["caption"] else None)
+        cap = p["caption"]
+        # Stash >= v0.32 returns signed URLs that already carry a query string.
+        sep = "&" if cap and "?" in cap else "?"
+        served("scene caption", f"{cap}{sep}lang=en&type=vtt" if cap else None)
     if pulse:
         served("interactive heatmap", pulse["paths"]["interactive_heatmap"])
 
