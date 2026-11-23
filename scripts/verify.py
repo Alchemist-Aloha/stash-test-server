@@ -185,6 +185,64 @@ def main() -> None:
         c.check("Mara Quill favourite", pf["favorite"], pf["favorite"])
         served("performer image", pf["image_path"])
 
+    # --- extended features -------------------------------------------------
+    def guard(label: str, fn: Callable[[], None]) -> None:
+        try:
+            fn()
+        except (StashError, KeyError, TypeError, IndexError) as e:
+            c.check(label, False, e)
+
+    def image_clips() -> None:
+        ims = s.gql("{ findImages(filter: {per_page: -1}) { images { title paths { preview }"
+                    " visual_files { __typename } } } }")["findImages"]["images"]
+        clips = [im for im in ims if any(f["__typename"] == "VideoFile" for f in im["visual_files"])]
+        c.eq("image clips", len(clips), exp["image_clips"])
+        for im in clips[:1]:
+            served("image clip preview", im["paths"]["preview"])
+
+    def chapters() -> None:
+        gals = s.gql("{ findGalleries(filter: {per_page: -1}) { galleries { code chapters { title } } } }")
+        c.eq("gallery chapters", sum(len(g["chapters"]) for g in gals["findGalleries"]["galleries"]),
+             exp["gallery_chapters"])
+
+    def performer_fields() -> None:
+        want = next(p for p in profile["performers"] if p["name"] == "Mara Quill")
+        got = s.gql('{ findPerformers(performer_filter: {name: {value: "Mara Quill", modifier: EQUALS}}) {'
+                    " performers { tattoos measurements custom_fields stash_ids { stash_id } } } }"
+                    )["findPerformers"]["performers"][0]
+        c.eq("performer tattoos", got["tattoos"], want["tattoos"])
+        c.eq("performer custom fields", got["custom_fields"], want["custom_fields"])
+        c.eq("performer stash ids", [x["stash_id"] for x in got["stash_ids"]],
+             [x["stash_id"] for x in want["stash_ids"]])
+
+    def scene_fields() -> None:
+        want = profile["scenes"]["Aurora Pictures/Coastal Drift.mp4"]
+        got = s.gql(f'{{ findScene(id: {drift["id"]}) {{ custom_fields stash_ids {{ stash_id }} }} }}')["findScene"]
+        c.eq("scene custom fields", got["custom_fields"], want["custom_fields"])
+        c.eq("scene stash ids", len(got["stash_ids"]), 1)
+
+    def stash_boxes() -> None:
+        boxes = s.gql("{ configuration { general { stashBoxes { name endpoint } } } }")
+        c.eq("stash boxes", len(boxes["configuration"]["general"]["stashBoxes"]), exp["stash_boxes"])
+
+    def scrapers() -> None:
+        names = [x["name"] for x in s.gql("{ listScrapers(types: [SCENE]) { name } }")["listScrapers"]]
+        c.check("fixture scraper listed", "Fixture Scraper" in names, names)
+        url = profile["scenes"]["Aurora Pictures/Coastal Drift.mp4"]["urls"][0]
+        scraped = s.gql("query($u: String!) { scrapeSceneURL(url: $u) { title details } }", {"u": url})["scrapeSceneURL"]
+        c.eq("scrape scene URL title", (scraped or {}).get("title"), "Coastal Drift")
+        found = s.gql('{ scrapeSinglePerformer(source: {scraper_id: "fixture_scraper"},'
+                      ' input: {query: "Mara"}) { name } }')["scrapeSinglePerformer"]
+        c.eq("scrape performer by name", [p["name"] for p in found], ["Mara Quill"])
+
+    guard("image clips", image_clips)
+    guard("gallery chapters", chapters)
+    guard("performer fields", performer_fields)
+    if drift:
+        guard("scene fields", scene_fields)
+    guard("stash boxes", stash_boxes)
+    guard("scrapers", scrapers)
+
     print(f"{c.passed} checks passed, {len(c.failures)} failed")
     if c.failures:
         print("\n".join(f"  FAIL {f}" for f in c.failures))

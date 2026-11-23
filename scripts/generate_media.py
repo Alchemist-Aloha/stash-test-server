@@ -27,7 +27,7 @@ import zipfile
 from dataclasses import dataclass
 from pathlib import Path
 
-GENERATOR_VERSION = 1  # bump when output changes; used as a CI cache key
+GENERATOR_VERSION = 2  # bump when output changes; used as a CI cache key
 
 
 @dataclass(frozen=True)
@@ -168,6 +168,12 @@ def generate(out: Path) -> dict:
     gif = images / "Loose" / "spinner.gif"
     run(["-f", "lavfi", "-i", "testsrc2=size=320x320:rate=12:duration=2", "-vf",
          "split[a][b];[a]palettegen[p];[b][p]paletteuse", "-loop", "0", str(gif)])
+
+    # A video under the image library: with createImageClipsFromVideos it becomes an image clip.
+    clip = images / "Clips" / "loop_clip.mp4"
+    clip.parent.mkdir(parents=True, exist_ok=True)
+    run(["-f", "lavfi", "-i", "testsrc2=size=480x480:rate=24", "-t", "3", "-pix_fmt", "yuv420p",
+         "-c:v", "libx264", "-preset", "veryfast", "-crf", "32", "-an", "-movflags", "+faststart", str(clip)])
 
     ocean = images / "Ocean Studies"
     for i, (c0, c1) in enumerate(OCEAN_COLOURS, start=1):

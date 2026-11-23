@@ -57,12 +57,14 @@
     },
     {
       "name": "Intro",
-      "description": "Marker tag for opening segments."
+      "description": "Marker tag for opening segments.",
+      "ignore_auto_tag": true
     },
     {
       "name": "Featured",
       "favorite": true,
-      "image": "tag_featured.png"
+      "image": "tag_featured.png",
+      "sort_name": "000 Featured"
     }
   ],
   "studios": [
@@ -119,7 +121,24 @@
         "https://example.com/performers/mara-quill"
       ],
       "details": "Lead fixture performer with every common field populated.",
-      "image": "performer_mara.png"
+      "image": "performer_mara.png",
+      "ethnicity": "Caucasian",
+      "measurements": "34-26-36",
+      "fake_tits": "Natural",
+      "career_start": "2012",
+      "tattoos": "Wave on left wrist",
+      "piercings": "Ears",
+      "weight": 58,
+      "custom_fields": {
+        "agency": "Fixture Talent",
+        "debut_year": 2012
+      },
+      "stash_ids": [
+        {
+          "endpoint": "https://stashbox.invalid/graphql",
+          "stash_id": "00000000-0000-4000-8000-000000000001"
+        }
+      ]
     },
     {
       "name": "Theo Vance",
@@ -128,14 +147,20 @@
       "country": "CA",
       "height_cm": 183,
       "rating100": 60,
-      "image": "performer_theo.png"
+      "image": "performer_theo.png",
+      "circumcised": "CUT",
+      "penis_length": 15.5,
+      "career_start": "2008",
+      "career_end": "2020"
     },
     {
       "name": "Iris Kade",
       "gender": "NON_BINARY",
       "birthdate": "1996-07-21",
       "country": "JP",
-      "image": "performer_iris.png"
+      "image": "performer_iris.png",
+      "death_date": "2025-12-31",
+      "ignore_auto_tag": true
     },
     {
       "name": "June Ash",
@@ -226,6 +251,17 @@
           "tags": [
             "Outdoor"
           ]
+        }
+      ],
+      "production_date": "2024-04-01",
+      "custom_fields": {
+        "camera": "Virtual testsrc2",
+        "take": 3
+      },
+      "stash_ids": [
+        {
+          "endpoint": "https://stashbox.invalid/graphql",
+          "stash_id": "00000000-0000-4000-8000-0000000000a1"
         }
       ]
     },
@@ -379,6 +415,12 @@
       "tags": [
         "Ocean"
       ]
+    },
+    "Clips/loop_clip.mp4": {
+      "title": "Loop Clip",
+      "tags": [
+        "Abstract"
+      ]
     }
   },
   "galleries": [
@@ -397,6 +439,17 @@
       ],
       "scenes": [
         "Aurora Pictures/Coastal Drift.mp4"
+      ],
+      "code": "OS-01",
+      "chapters": [
+        {
+          "title": "Calm",
+          "image_index": 1
+        },
+        {
+          "title": "Storm",
+          "image_index": 5
+        }
       ]
     },
     {
@@ -453,13 +506,26 @@
     "interactive_scenes": 1,
     "scenes_with_captions": 1,
     "scene_markers": 3,
-    "images": 19,
+    "images": 20,
     "galleries": 3,
     "performers": 4,
     "studios": 3,
     "tags": 11,
     "groups": 3,
-    "saved_filters": 3
+    "saved_filters": 3,
+    "image_clips": 2,
+    "gallery_chapters": 2,
+    "stash_boxes": 1,
+    "scrapers": 1
   },
-  "$comment_saved_filters": "Saved filters use find_filter only: object_filter is stored in Stash's UI criterion format, which changes between releases."
+  "$comment_saved_filters": "Saved filters use find_filter only: object_filter is stored in Stash's UI criterion format, which changes between releases.",
+  "stash_boxes": [
+    {
+      "name": "Fixture Box",
+      "endpoint": "https://stashbox.invalid/graphql",
+      "api_key": "fixture-box-key"
+    }
+  ],
+  "$comment_stash_boxes": "Unreachable endpoint (.invalid): exercises stash-box config and stash_ids; tagger lookups are expected to fail.",
+  "$comment_image_clips": "With createImageClipsFromVideos, Stash stores Clips/loop_clip.mp4 and the animated Loose/spinner.gif as VideoFile-backed images."
 }

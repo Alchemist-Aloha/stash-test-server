@@ -64,7 +64,11 @@ class Seeder:
                 {
                     "i": {
                         "configLocation": f"{data_dir}/config.yml",
-                        "stashes": [{"path": library_dir, "excludeVideo": False, "excludeImage": False}],
+                        # Separate roots so videos under images/ become image clips, not scenes.
+                        "stashes": [
+                            {"path": f"{library_dir}/scenes", "excludeVideo": False, "excludeImage": True},
+                            {"path": f"{library_dir}/images", "excludeVideo": True, "excludeImage": False},
+                        ],
                         "databaseFile": f"{data_dir}/stash-go.sqlite",
                         "generatedLocation": f"{data_dir}/generated",
                         "cacheLocation": f"{data_dir}/cache",
@@ -79,8 +83,10 @@ class Seeder:
         if status["status"] != "OK":
             raise StashError(f"unexpected system status {status}")
 
-    def configure(self, ffmpeg: str | None, ffprobe: str | None) -> None:
+    def configure(self, ffmpeg: str | None, ffprobe: str | None, scrapers_dir: str | None) -> None:
         general: dict[str, Any] = {
+            "createImageClipsFromVideos": True,
+            "stashBoxes": self.p.get("stash_boxes", []),
             "calculateMD5": True,
             "parallelTasks": 0,
             "previewSegments": 6,
@@ -94,7 +100,11 @@ class Seeder:
             general["ffmpegPath"] = ffmpeg
         if ffprobe:
             general["ffprobePath"] = ffprobe
+        if scrapers_dir:
+            general["scrapersPath"] = scrapers_dir
         self.s.gql("mutation($i: ConfigGeneralInput!) { configureGeneral(input: $i) { parallelTasks } }", {"i": general})
+        if scrapers_dir:
+            self.s.gql("mutation { reloadScrapers }")
 
     def scan_and_generate(self) -> None:
         print("scanning library")
@@ -134,6 +144,8 @@ class Seeder:
                             "description": t.get("description"),
                             "aliases": t.get("aliases"),
                             "favorite": t.get("favorite"),
+                            "sort_name": t.get("sort_name"),
+                            "ignore_auto_tag": t.get("ignore_auto_tag"),
                             "image": self.img(t.get("image")),
                             "parent_ids": [self.tags[n] for n in t.get("parents", [])],
                         }
@@ -170,6 +182,9 @@ class Seeder:
         passthrough = (
             "disambiguation", "gender", "birthdate", "country", "height_cm", "eye_color",
             "hair_color", "favorite", "rating100", "alias_list", "urls", "details",
+            "ethnicity", "measurements", "fake_tits", "penis_length", "circumcised", "career_start",
+            "career_end", "tattoos", "piercings", "weight", "death_date", "ignore_auto_tag",
+            "custom_fields", "stash_ids",
         )
         for pf in self.p["performers"]:
             fields = {k: pf.get(k) for k in passthrough}
@@ -233,12 +248,13 @@ class Seeder:
         marker_count = 0
         for key, sc in self.p["scenes"].items():
             sid = self.scenes[key]
-            meta = {k: sc.get(k) for k in ("title", "code", "details", "director", "date", "rating100", "organized", "urls")}
+            meta = {k: sc.get(k) for k in ("title", "code", "details", "director", "date", "production_date", "rating100", "organized", "urls", "stash_ids")}
             meta.update(
                 id=sid,
                 studio_id=self.studios.get(sc.get("studio", "")),
                 performer_ids=[self.performers[n] for n in sc.get("performers", [])],
                 tag_ids=[self.tags[n] for n in sc.get("tags", [])],
+                custom_fields={"full": sc["custom_fields"]} if "custom_fields" in sc else None,
                 groups=[{"group_id": self.groups[g["name"]], "scene_index": g.get("scene_index")} for g in sc.get("groups", [])],
             )
             meta = compact(meta)
@@ -311,7 +327,7 @@ class Seeder:
                     by_key[key.rstrip("/")] = g["id"]
 
         for gal in self.p["galleries"]:
-            fields = {k: gal.get(k) for k in ("title", "date", "details", "rating100", "photographer")}
+            fields = {k: gal.get(k) for k in ("title", "code", "date", "details", "rating100", "photographer")}
             fields.update(
                 studio_id=self.studios.get(gal.get("studio", "")),
                 performer_ids=[self.performers[n] for n in gal.get("performers", [])],
@@ -331,8 +347,13 @@ class Seeder:
                 key = gal.get("folder") or gal.get("zip")
                 if key not in by_key:
                     raise StashError(f"scan did not create gallery for {key!r}; found {sorted(by_key)}")
-                fields["id"] = by_key[key]
+                gid = fields["id"] = by_key[key]
                 self.s.gql("mutation($i: GalleryUpdateInput!) { galleryUpdate(input: $i) { id } }", {"i": compact(fields)})
+            for ch in gal.get("chapters", []):
+                self.s.gql(
+                    "mutation($i: GalleryChapterCreateInput!) { galleryChapterCreate(input: $i) { id } }",
+                    {"i": {"gallery_id": gid, "title": ch["title"], "image_index": ch["image_index"]}},
+                )
         print(f"configured {len(self.p['galleries'])} galleries")
 
     def save_filters(self) -> None:
@@ -414,6 +435,11 @@ def main() -> None:
     ap.add_argument("--server-library-dir", required=True, help="media/library directory, as seen by the server")
     ap.add_argument("--ffmpeg", default=shutil.which("ffmpeg"), help="ffmpeg path as seen by the server")
     ap.add_argument("--ffprobe", default=shutil.which("ffprobe"), help="ffprobe path as seen by the server")
+    ap.add_argument(
+        "--server-scrapers-dir",
+        default=str(ROOT / "fixtures" / "scrapers"),
+        help="fixtures/scrapers directory, as seen by the server ('' to skip scrapers)",
+    )
     ap.add_argument("--env-out", type=Path, default=ROOT / "stash-test-server.env")
     args = ap.parse_args()
 
@@ -426,7 +452,7 @@ def main() -> None:
             print("server already secured; assuming it was seeded earlier")
         else:
             seeder.setup(args.server_data_dir, args.server_library_dir)
-            seeder.configure(args.ffmpeg, args.ffprobe)
+            seeder.configure(args.ffmpeg, args.ffprobe, args.server_scrapers_dir)
             if seeder.already_seeded():
                 print("fixture entities already present; skipping seeding")
             else:

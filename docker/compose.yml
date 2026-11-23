@@ -3,6 +3,7 @@
 #   python3 scripts/generate_media.py --out media
 #   docker compose -f docker/compose.yml up -d
 #   python3 scripts/seed.py --server-data-dir /data --server-library-dir /library \
+#       --server-scrapers-dir /fixtures/scrapers \
 #       --ffmpeg /usr/bin/ffmpeg --ffprobe /usr/bin/ffprobe
 #   python3 scripts/verify.py
 #
@@ -17,6 +18,7 @@ services:
       STASH_NOBROWSER: "true"
     volumes:
       - ../media/library:/library:ro
+      - ../fixtures:/fixtures:ro  # scraper script reads ../profile.json
       - stash-data:/data
       # Keep the image from reading a pre-existing config: first run enters SETUP.
       - stash-root:/root/.stash

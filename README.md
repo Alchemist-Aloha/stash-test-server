@@ -17,18 +17,21 @@ Client tests should read their expected values from that file, not hard-code the
 | Area | Coverage |
 | --- | --- |
 | Scenes (10) | H.264 MP4 1080p/720p/1440p, VP9 WebM, MKV, MOV without audio, vertical 720×1280, square 1080×1080, a 480p phash duplicate, untitled/unorganized scenes |
-| Scene data | title, code, details, director, date, rating, organized, studio, performers, tags, URLs, group membership with index, O count, play count, resume point |
+| Scene data | title, code, details, director, date, production date, rating, organized, studio, performers, tags, URLs, group membership with index, O count, play count, resume point, custom fields, stash IDs |
 | Markers (3) | point and ranged markers, primary and secondary tags, generated marker previews and screenshots |
 | Captions | `en` VTT and `de` SRT on one scene |
 | Interactive | `.funscript` scene with a generated heatmap |
 | Generated media | covers, previews, WebP previews, sprites and VTT, phashes, image thumbnails |
-| Images (19) | JPEG, PNG, WebP, animated GIF, portrait and landscape, with metadata and O count |
-| Galleries (3) | folder gallery (`.forcegallery`), zip gallery, manually created gallery |
-| Performers (4) | full field set, aliases, favourite, tags, artwork; one without an image |
+| Images (20) | JPEG, PNG, WebP, animated GIF, portrait and landscape, with metadata and O count |
+| Image clips (2) | an MP4 and the animated GIF, stored as video-backed images (`createImageClipsFromVideos`) |
+| Galleries (3) | folder gallery (`.forcegallery`) with chapters, zip gallery, manually created gallery |
+| Performers (4) | full field set (measurements, tattoos, piercings, career, circumcision, death date, ...), aliases, favourite, tags, artwork, custom fields, stash IDs; one without an image |
 | Studios (3) | parent/child hierarchy, aliases, rating, favourite, logos |
-| Tags (11) | parent/child hierarchy, aliases, descriptions, favourite, image |
+| Tags (11) | parent/child hierarchy, aliases, descriptions, favourite, image, sort name, ignore auto-tag |
 | Groups (3) | front/back covers, studio, director, synopsis, sub-groups |
 | Saved filters (3) | scenes, performers, images |
+| Scrapers | offline `Fixture Scraper` (script scraper in `fixtures/scrapers/`): scene by URL/name/fragment, performer by URL/name/fragment |
+| Stash-box | one endpoint (`stashbox.invalid`, unreachable by design) plus stash IDs, for tagger UI; lookups fail |
 | Auth | username/password session login **and** an API key; anonymous requests are rejected |
 
 ## Use it in GitHub Actions

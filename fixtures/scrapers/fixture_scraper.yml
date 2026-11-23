@@ -1,0 +1,28 @@
+# Offline scraper backed by fixtures/profile.json, so scrape/tagger flows work
+# without network access. Stash runs the script with this directory as cwd.
+name: Fixture Scraper
+sceneByURL:
+  - action: script
+    url:
+      - example.com/scenes/
+    script: [python3, fixture_scraper.py, sceneByURL]
+sceneByName:
+  action: script
+  script: [python3, fixture_scraper.py, sceneByName]
+sceneByQueryFragment:
+  action: script
+  script: [python3, fixture_scraper.py, sceneByFragment]
+sceneByFragment:
+  action: script
+  script: [python3, fixture_scraper.py, sceneByFragment]
+performerByURL:
+  - action: script
+    url:
+      - example.com/performers/
+    script: [python3, fixture_scraper.py, performerByURL]
+performerByName:
+  action: script
+  script: [python3, fixture_scraper.py, performerByName]
+performerByFragment:
+  action: script
+  script: [python3, fixture_scraper.py, performerByFragment]
