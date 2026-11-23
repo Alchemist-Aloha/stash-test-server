@@ -61,17 +61,30 @@ runs:
     - name: Install ffmpeg
       shell: bash
       run: |
-        if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+        # generate_media.py needs these encoders; slim builds lack some
+        # (Homebrew's ffmpeg formula has no WebP encoder).
+        encoders="libx264 libvpx-vp9 libopus libwebp aac"
+        has_encoders() {
+          command -v ffmpeg >/dev/null && command -v ffprobe >/dev/null || return 1
+          local list; list="$(ffmpeg -hide_banner -encoders 2>/dev/null)"
+          for e in $encoders; do grep -qw -- "$e" <<<"$list" || return 1; done
+        }
+        if ! has_encoders; then
           if [[ "$RUNNER_OS" == "Linux" ]]; then
             sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
           elif [[ "$RUNNER_OS" == "macOS" ]]; then
-            brew install ffmpeg
+            brew install ffmpeg-full
+            # ffmpeg-full is keg-only, so put it ahead of any slim ffmpeg.
+            bin="$(brew --prefix ffmpeg-full)/bin"
+            export PATH="$bin:$PATH"
+            echo "$bin" >> "$GITHUB_PATH"
           elif [[ "$RUNNER_OS" == "Windows" ]]; then
             choco install ffmpeg -y --no-progress
           else
             echo "::error::ffmpeg is required" && exit 1
           fi
         fi
+        has_encoders || { echo "::error::ffmpeg lacks one of: $encoders"; exit 1; }
         ffmpeg -hide_banner -version | head -1
 
     - name: Restore generated media
