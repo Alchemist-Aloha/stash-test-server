@@ -1,0 +1,105 @@
+name: Stash test server
+description: >
+  Start a real Stash server seeded with a deterministic, fully featured fixture
+  library (royalty-free generated media) for client end-to-end tests.
+branding:
+  icon: film
+  color: blue
+
+inputs:
+  stash-version:
+    description: Stash release tag (for example v0.29.3) or "latest". Defaults to the STASH_VERSION file.
+    required: false
+    default: ""
+  port:
+    description: Port to bind on 127.0.0.1.
+    required: false
+    default: "9999"
+  verify:
+    description: Run scripts/verify.py after seeding.
+    required: false
+    default: "true"
+
+outputs:
+  url:
+    description: Base URL of the server, e.g. http://127.0.0.1:9999
+    value: ${{ steps.seed.outputs.url }}
+  api-key:
+    description: API key for the fixture user (masked in logs).
+    value: ${{ steps.seed.outputs.api-key }}
+  username:
+    description: Username for session (password) login.
+    value: ${{ steps.seed.outputs.username }}
+  password:
+    description: Password for session login.
+    value: ${{ steps.seed.outputs.password }}
+  fixture:
+    description: Absolute path to fixtures/profile.json describing the seeded data.
+    value: ${{ steps.seed.outputs.fixture }}
+  data-dir:
+    description: Stash data directory (database, generated files, stash.log).
+    value: ${{ steps.paths.outputs.data }}
+
+runs:
+  using: composite
+  steps:
+    - id: paths
+      shell: bash
+      run: |
+        work="$RUNNER_TEMP/stash-test-server"
+        mkdir -p "$work"
+        echo "work=$work" >> "$GITHUB_OUTPUT"
+        echo "media=$work/media" >> "$GITHUB_OUTPUT"
+        echo "data=$work/data" >> "$GITHUB_OUTPUT"
+        echo "media-key=stash-test-media-${{ runner.os }}-${{ runner.arch }}-${{ hashFiles(format('{0}/scripts/generate_media.py', github.action_path)) }}" >> "$GITHUB_OUTPUT"
+
+    - name: Install ffmpeg
+      shell: bash
+      run: |
+        if ! command -v ffmpeg >/dev/null || ! command -v ffprobe >/dev/null; then
+          if [[ "$RUNNER_OS" == "Linux" ]]; then
+            sudo apt-get update -q && sudo apt-get install -y -q ffmpeg
+          elif [[ "$RUNNER_OS" == "macOS" ]]; then
+            brew install ffmpeg
+          else
+            echo "::error::ffmpeg is required" && exit 1
+          fi
+        fi
+        ffmpeg -hide_banner -version | head -1
+
+    - name: Restore generated media
+      uses: actions/cache@v4
+      with:
+        path: ${{ steps.paths.outputs.media }}
+        key: ${{ steps.paths.outputs.media-key }}
+
+    - name: Generate media
+      shell: bash
+      run: python3 "${{ github.action_path }}/scripts/generate_media.py" --out "${{ steps.paths.outputs.media }}"
+
+    - name: Install and start Stash
+      shell: bash
+      run: |
+        "${{ github.action_path }}/scripts/install_stash.sh" ${{ inputs.stash-version }}
+        "${{ github.action_path }}/scripts/start_stash.sh" "${{ steps.paths.outputs.data }}" "${{ inputs.port }}"
+
+    - id: seed
+      name: Seed fixture profile
+      shell: bash
+      run: |
+        python3 "${{ github.action_path }}/scripts/seed.py" \
+          --url "http://127.0.0.1:${{ inputs.port }}" \
+          --assets "${{ steps.paths.outputs.media }}/assets" \
+          --server-data-dir "${{ steps.paths.outputs.data }}" \
+          --server-library-dir "${{ steps.paths.outputs.media }}/library" \
+          --env-out "${{ steps.paths.outputs.work }}/stash-test-server.env"
+
+    - name: Verify server
+      if: inputs.verify == 'true'
+      shell: bash
+      run: python3 "${{ github.action_path }}/scripts/verify.py" --env "${{ steps.paths.outputs.work }}/stash-test-server.env"
+
+    - name: Stash log on failure
+      if: failure()
+      shell: bash
+      run: tail -n 200 "${{ steps.paths.outputs.data }}/stash.log" || true

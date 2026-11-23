@@ -1,0 +1,465 @@
+{
+  "$comment": "Canonical StashFlow e2e profile. scripts/seed.py applies it to a fresh Stash server and scripts/verify.py (plus client test suites) assert against it. Keys under scenes/images are library-relative file paths created by scripts/generate_media.py.",
+  "version": 1,
+  "credentials": {
+    "username": "stashflow",
+    "password": "stashflow-e2e"
+  },
+  "tags": [
+    {
+      "name": "Abstract",
+      "description": "Non-representational patterns.",
+      "favorite": true
+    },
+    {
+      "name": "Fractal",
+      "parents": [
+        "Abstract"
+      ]
+    },
+    {
+      "name": "Geometry",
+      "parents": [
+        "Abstract"
+      ],
+      "aliases": [
+        "Shapes"
+      ]
+    },
+    {
+      "name": "Nature",
+      "description": "Organic and outdoor material."
+    },
+    {
+      "name": "Ocean",
+      "parents": [
+        "Nature"
+      ],
+      "aliases": [
+        "Sea"
+      ]
+    },
+    {
+      "name": "Outdoor",
+      "parents": [
+        "Nature"
+      ]
+    },
+    {
+      "name": "City"
+    },
+    {
+      "name": "Night"
+    },
+    {
+      "name": "Vertical",
+      "description": "Portrait-orientation video."
+    },
+    {
+      "name": "Intro",
+      "description": "Marker tag for opening segments."
+    },
+    {
+      "name": "Featured",
+      "favorite": true,
+      "image": "tag_featured.png"
+    }
+  ],
+  "studios": [
+    {
+      "name": "Meridian Media Group",
+      "urls": [
+        "https://example.com/meridian"
+      ],
+      "details": "Parent network for the e2e fixture studios.",
+      "image": "studio_meridian.png"
+    },
+    {
+      "name": "Aurora Pictures",
+      "parent": "Meridian Media Group",
+      "favorite": true,
+      "rating100": 90,
+      "aliases": [
+        "Aurora"
+      ],
+      "tags": [
+        "Featured"
+      ],
+      "image": "studio_aurora.png"
+    },
+    {
+      "name": "Northwind Studio",
+      "parent": "Meridian Media Group",
+      "rating100": 60,
+      "aliases": [
+        "Northwind"
+      ],
+      "image": "studio_northwind.png"
+    }
+  ],
+  "performers": [
+    {
+      "name": "Mara Quill",
+      "disambiguation": "fixture",
+      "gender": "FEMALE",
+      "birthdate": "1990-03-14",
+      "country": "NZ",
+      "height_cm": 168,
+      "eye_color": "Green",
+      "hair_color": "Auburn",
+      "favorite": true,
+      "rating100": 80,
+      "alias_list": [
+        "M. Quill"
+      ],
+      "tags": [
+        "Featured"
+      ],
+      "urls": [
+        "https://example.com/performers/mara-quill"
+      ],
+      "details": "Lead fixture performer with every common field populated.",
+      "image": "performer_mara.png"
+    },
+    {
+      "name": "Theo Vance",
+      "gender": "MALE",
+      "birthdate": "1985-11-02",
+      "country": "CA",
+      "height_cm": 183,
+      "rating100": 60,
+      "image": "performer_theo.png"
+    },
+    {
+      "name": "Iris Kade",
+      "gender": "NON_BINARY",
+      "birthdate": "1996-07-21",
+      "country": "JP",
+      "image": "performer_iris.png"
+    },
+    {
+      "name": "June Ash",
+      "gender": "FEMALE",
+      "birthdate": "2001-01-30",
+      "$comment": "Intentionally has no image to exercise placeholder rendering."
+    }
+  ],
+  "groups": [
+    {
+      "name": "Tidal Trilogy",
+      "studio": "Aurora Pictures",
+      "date": "2024-06-01",
+      "director": "Lena Ortiz",
+      "synopsis": "Three short studies of light on water.",
+      "duration": 65,
+      "rating100": 85,
+      "tags": [
+        "Ocean"
+      ],
+      "urls": [
+        "https://example.com/groups/tidal-trilogy"
+      ],
+      "front_image": "group_tidal_front.png",
+      "back_image": "group_tidal_back.png"
+    },
+    {
+      "name": "Patterns Vol. 1",
+      "studio": "Northwind Studio",
+      "date": "2025-02-10",
+      "tags": [
+        "Abstract"
+      ],
+      "front_image": "group_patterns_front.png"
+    },
+    {
+      "name": "Patterns Collection",
+      "studio": "Northwind Studio",
+      "sub_groups": [
+        {
+          "name": "Patterns Vol. 1",
+          "description": "First volume"
+        }
+      ]
+    }
+  ],
+  "scenes": {
+    "Aurora Pictures/Coastal Drift.mp4": {
+      "title": "Coastal Drift",
+      "code": "AP-001",
+      "details": "Fully populated scene: captions, markers, group membership, history.",
+      "director": "Lena Ortiz",
+      "date": "2024-05-12",
+      "rating100": 90,
+      "organized": true,
+      "studio": "Aurora Pictures",
+      "performers": [
+        "Mara Quill",
+        "Theo Vance"
+      ],
+      "tags": [
+        "Ocean",
+        "Outdoor"
+      ],
+      "urls": [
+        "https://example.com/scenes/coastal-drift"
+      ],
+      "groups": [
+        {
+          "name": "Tidal Trilogy",
+          "scene_index": 1
+        }
+      ],
+      "o_count": 2,
+      "play_count": 3,
+      "resume_time": 14.5,
+      "markers": [
+        {
+          "title": "Opening",
+          "seconds": 0,
+          "primary_tag": "Intro"
+        },
+        {
+          "title": "Wave sequence",
+          "seconds": 12,
+          "end_seconds": 20,
+          "primary_tag": "Ocean",
+          "tags": [
+            "Outdoor"
+          ]
+        }
+      ]
+    },
+    "Aurora Pictures/Harbor Lights.mp4": {
+      "title": "Harbor Lights",
+      "date": "2024-07-03",
+      "rating100": 70,
+      "organized": true,
+      "studio": "Aurora Pictures",
+      "performers": [
+        "Mara Quill"
+      ],
+      "tags": [
+        "City",
+        "Night"
+      ],
+      "groups": [
+        {
+          "name": "Tidal Trilogy",
+          "scene_index": 2
+        }
+      ],
+      "play_count": 1,
+      "markers": [
+        {
+          "title": "Lights on",
+          "seconds": 8,
+          "primary_tag": "Night"
+        }
+      ]
+    },
+    "Aurora Pictures/Harbor Lights (480p).mp4": {
+      "$comment": "Lower-resolution duplicate of Harbor Lights with no metadata; exercises phash dedup and untitled/unorganized states."
+    },
+    "Aurora Pictures/Ember Field.mp4": {
+      "title": "Ember Field",
+      "date": "2024-08-20",
+      "rating100": 75,
+      "studio": "Aurora Pictures",
+      "performers": [
+        "Theo Vance"
+      ],
+      "tags": [
+        "Outdoor"
+      ],
+      "groups": [
+        {
+          "name": "Tidal Trilogy",
+          "scene_index": 3
+        }
+      ]
+    },
+    "Northwind Studio/Prism Study.webm": {
+      "title": "Prism Study",
+      "date": "2025-01-15",
+      "rating100": 60,
+      "studio": "Northwind Studio",
+      "performers": [
+        "Iris Kade"
+      ],
+      "tags": [
+        "Abstract",
+        "Geometry"
+      ]
+    },
+    "Northwind Studio/Mandelbrot Zoom.mkv": {
+      "title": "Mandelbrot Zoom",
+      "date": "2025-01-22",
+      "studio": "Northwind Studio",
+      "tags": [
+        "Fractal"
+      ],
+      "o_count": 1
+    },
+    "Northwind Studio/Cellular Bloom.mp4": {
+      "title": "Cellular Bloom",
+      "date": "2025-02-10",
+      "rating100": 50,
+      "studio": "Northwind Studio",
+      "performers": [
+        "Iris Kade",
+        "June Ash"
+      ],
+      "tags": [
+        "Abstract"
+      ],
+      "groups": [
+        {
+          "name": "Patterns Vol. 1",
+          "scene_index": 1
+        }
+      ]
+    },
+    "Vertical/Pocket Garden.mp4": {
+      "title": "Pocket Garden",
+      "date": "2025-04-05",
+      "rating100": 80,
+      "organized": true,
+      "performers": [
+        "June Ash"
+      ],
+      "tags": [
+        "Vertical",
+        "Nature"
+      ]
+    },
+    "Interactive/Pulse Lab.mp4": {
+      "title": "Pulse Lab",
+      "details": "Has a sibling .funscript, so Stash marks it interactive.",
+      "tags": [
+        "Abstract"
+      ]
+    },
+    "Loose/Silent Grid.mov": {
+      "$comment": "No audio stream and no metadata."
+    }
+  },
+  "images": {
+    "Loose/sunrise_gradient.jpg": {
+      "title": "Sunrise Gradient",
+      "rating100": 80,
+      "performers": [
+        "Mara Quill"
+      ],
+      "tags": [
+        "Nature"
+      ]
+    },
+    "Loose/color_bars.png": {
+      "title": "Color Bars",
+      "tags": [
+        "Geometry"
+      ],
+      "o_count": 1
+    },
+    "Loose/rings.webp": {
+      "title": "Rings",
+      "studio": "Northwind Studio"
+    },
+    "Loose/spinner.gif": {
+      "title": "Spinner",
+      "tags": [
+        "Abstract"
+      ]
+    },
+    "Ocean Studies/ocean_01.jpg": {
+      "title": "Ocean Study 1",
+      "performers": [
+        "Theo Vance"
+      ],
+      "tags": [
+        "Ocean"
+      ]
+    }
+  },
+  "galleries": [
+    {
+      "folder": "Ocean Studies",
+      "title": "Ocean Studies",
+      "date": "2024-05-20",
+      "rating100": 70,
+      "photographer": "Lena Ortiz",
+      "studio": "Aurora Pictures",
+      "performers": [
+        "Mara Quill"
+      ],
+      "tags": [
+        "Ocean"
+      ],
+      "scenes": [
+        "Aurora Pictures/Coastal Drift.mp4"
+      ]
+    },
+    {
+      "zip": "Geometry.zip",
+      "title": "Geometry Pack",
+      "studio": "Northwind Studio",
+      "tags": [
+        "Geometry"
+      ]
+    },
+    {
+      "create": true,
+      "title": "Favourites Selection",
+      "details": "Manually created gallery with hand-picked images.",
+      "images": [
+        "Loose/sunrise_gradient.jpg",
+        "Loose/color_bars.png",
+        "Loose/rings.webp",
+        "Ocean Studies/ocean_03.jpg"
+      ]
+    }
+  ],
+  "saved_filters": [
+    {
+      "mode": "SCENES",
+      "name": "Top rated",
+      "find_filter": {
+        "sort": "rating",
+        "direction": "DESC",
+        "per_page": 40
+      }
+    },
+    {
+      "mode": "PERFORMERS",
+      "name": "Performers A-Z",
+      "find_filter": {
+        "sort": "name",
+        "direction": "ASC"
+      }
+    },
+    {
+      "mode": "IMAGES",
+      "name": "Ocean images",
+      "find_filter": {
+        "q": "Ocean",
+        "sort": "title",
+        "direction": "ASC"
+      }
+    }
+  ],
+  "expected": {
+    "scenes": 10,
+    "organized_scenes": 3,
+    "interactive_scenes": 1,
+    "scenes_with_captions": 1,
+    "scene_markers": 3,
+    "images": 19,
+    "galleries": 3,
+    "performers": 4,
+    "studios": 3,
+    "tags": 11,
+    "groups": 3,
+    "saved_filters": 3
+  },
+  "$comment_saved_filters": "Saved filters use find_filter only: object_filter is stored in Stash's UI criterion format, which changes between releases."
+}

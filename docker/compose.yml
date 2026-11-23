@@ -1,0 +1,25 @@
+# Alternative to scripts/up.sh: run Stash in Docker, then seed from the host.
+#
+#   python3 scripts/generate_media.py --out media
+#   docker compose -f docker/compose.yml up -d
+#   python3 scripts/seed.py --server-data-dir /data --server-library-dir /library \
+#       --ffmpeg /usr/bin/ffmpeg --ffprobe /usr/bin/ffprobe
+#   python3 scripts/verify.py
+#
+# Paths passed to seed.py are the *container* paths below.
+services:
+  stash:
+    image: stashapp/stash:${STASH_IMAGE_TAG:-latest}
+    ports:
+      - "127.0.0.1:9999:9999"
+    environment:
+      STASH_PORT: "9999"
+      STASH_NOBROWSER: "true"
+    volumes:
+      - ../media/library:/library:ro
+      - stash-data:/data
+      # Keep the image from reading a pre-existing config: first run enters SETUP.
+      - stash-root:/root/.stash
+volumes:
+  stash-data:
+  stash-root:

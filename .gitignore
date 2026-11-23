@@ -1,0 +1,5 @@
+/bin/
+/media/
+/.stash-data/
+/stash-test-server.env
+__pycache__/
